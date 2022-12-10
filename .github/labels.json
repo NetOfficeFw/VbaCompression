@@ -1,0 +1,15 @@
+[
+  { "name": "feature", "color": "#91ca55", "description": "New feature or enhancement" },
+  { "name": "bug", "color": "#ee3f46", "description": "Something isn't working" },
+  { "name": "security", "color": "#ee3f46", "description": "Security related work" },
+  { "name": "chore", "color": "#fef2c0", "description": "A routine task" },
+
+  { "name": "release", "color": "#6538a9", "description": "Project release" },
+  { "name": "build", "color": "#633a9f", "description": "Build system related tasks" },
+
+  { "name": "documentation", "color": "#0075ca", "description": "Improvements or additions to documentation" },
+
+  { "name": "wip", "color": "#fbca04", "description": "Work in progress" },
+  { "name": "invalid", "color": "#d2dae1", "description": "This doesn't seem right" },
+  { "name": "wontfix", "color": "#d2dae1", "description": "This will not be worked on" }
+]
