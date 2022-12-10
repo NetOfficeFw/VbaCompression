@@ -11,8 +11,8 @@ namespace Kavod.Vba.Compression.Tests
         
         public TestCompressedContainer()
         {
-            _validCompressedDirStream = File.ReadAllBytes(@"Test Files\ValidCompressedDirStream");
-            _validDecompressedDirStream = File.ReadAllBytes(@"Test Files\ValidDecompressedDirStream");
+            _validCompressedDirStream = File.ReadAllBytes(@"Test Files/ValidCompressedDirStream");
+            _validDecompressedDirStream = File.ReadAllBytes(@"Test Files/ValidDecompressedDirStream");
         }
 
         [Fact]
