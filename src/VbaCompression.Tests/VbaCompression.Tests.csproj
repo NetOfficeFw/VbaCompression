@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Kavod.Vba.Compression\Kavod.Vba.Compression.csproj" />
+    <ProjectReference Include="..\VbaCompression\VbaCompression.csproj" />
   </ItemGroup>
 
 </Project>

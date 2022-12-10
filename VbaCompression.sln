@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2026
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kavod.Vba.Compression", "src\Kavod.Vba.Compression\Kavod.Vba.Compression.csproj", "{E1DA4414-FAFE-4BE6-A380-BFE7AE1B98FF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VbaCompression", "src\VbaCompression\VbaCompression.csproj", "{E1DA4414-FAFE-4BE6-A380-BFE7AE1B98FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kavod.Vba.Compression.Tests", "src\Kavod.Vba.Compression.Tests\Kavod.Vba.Compression.Tests.csproj", "{59AADB4B-0D8D-4A62-8369-6B38C6B835A4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VbaCompression.Tests", "src\VbaCompression.Tests\VbaCompression.Tests.csproj", "{59AADB4B-0D8D-4A62-8369-6B38C6B835A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

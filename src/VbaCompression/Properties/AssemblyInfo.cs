@@ -27,4 +27,4 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: InternalsVisibleTo("Kavod.Vba.Compression.Tests")]
+[assembly: InternalsVisibleTo("VbaCompression.Tests")]
