@@ -3,10 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net48;netstandard2.0;net6.0</TargetFrameworks>
     <Copyright>Copyright © 2016 Ross Knudsen</Copyright>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AutoGenerateBindingRedirects>True</AutoGenerateBindingRedirects>
     <Authors>Ross Knudsen</Authors>
-    <Company />
     <Description>VBA uses a compression algorithm when packaging code into a VBA Project within a Microsoft Office file. The specification can be found here: https://docs.microsoft.com/en-us/openspecs/office_file_formats/ms-ovba/575462ba-bf67-4190-9fac-c275523c75fc</Description>
     <RepositoryUrl>https://github.com/rossknudsen/Kavod.Vba.Compression</RepositoryUrl>
     <AssemblyVersion>0.0.2.0</AssemblyVersion>
