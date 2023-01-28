@@ -16,6 +16,7 @@ env:
   ContinuousIntegrationBuild: true
   RestoreLockedMode: true
   Configuration: Release
+  VersionSuffix: preview${{ github.run_id }}
 
 jobs:
   build:
@@ -29,9 +30,21 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 7
+
     - name: restore
       run: dotnet restore
+
     - name: build
       run: dotnet build --no-restore
+
     - name: test
-      run: dotnet test --no-restore
+      run: dotnet test --no-build --no-restore
+
+    - name: pack
+      run: dotnet pack --no-build --no-restore -o dist
+
+    - name: publish artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: VbaCompression_${{ env.VersionSuffix }}
+        path: '${{ github.workspace }}/dist'
