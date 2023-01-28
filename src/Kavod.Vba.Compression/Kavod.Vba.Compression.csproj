@@ -1,18 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <PackageId>NetOfficeFw.VbaCompression</PackageId>
+    <VersionPrefix>0.3.0</VersionPrefix>
     <TargetFrameworks>net48;netstandard2.0;net6.0</TargetFrameworks>
     <Copyright>Copyright © 2016 Ross Knudsen</Copyright>
     <Authors>Ross Knudsen</Authors>
-    <Description>VBA uses a compression algorithm when packaging code into a VBA Project within a Microsoft Office file. The specification can be found here: https://docs.microsoft.com/en-us/openspecs/office_file_formats/ms-ovba/575462ba-bf67-4190-9fac-c275523c75fc</Description>
+    <Description>VbaCompression library implements [MS-OVBA] Compression and Decompression algorithms used in the Office VBA File Format structures. Office VBA project contains embedded macros and custom forms for use in Microsoft Office documents.</Description>
     <RepositoryUrl>https://github.com/NetOfficeFw/VbaCompression.git</RepositoryUrl>
     <PackageProjectUrl>https://github.com/NetOfficeFw/VbaCompression</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>0.3.0</Version>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>Icon.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="Icon.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>
