@@ -68,7 +68,6 @@ jobs:
         dotnet-version: 7
 
     - name: setup NuGetKeyVaultSignTool
-      if: steps.cache-dotnettools.outputs.cache-hit != 'true'
       run: dotnet tool install --verbosity minimal --global NuGetKeyVaultSignTool --version 3.2.2
 
     - name: sign
