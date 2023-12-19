@@ -2,34 +2,13 @@
 
   <PropertyGroup>
     <PackageId>NetOfficeFw.VbaCompression</PackageId>
-    <Version>0.4.0</Version>
     <TargetFrameworks>net48;netstandard2.0;net8.0</TargetFrameworks>
-    <Copyright>Copyright © 2016 Ross Knudsen</Copyright>
-    <Authors>Ross Knudsen</Authors>
     <Description>VbaCompression library implements [MS-OVBA] Compression and Decompression algorithms used in the Office VBA File Format structures. Office VBA project contains embedded macros and custom forms for use in Microsoft Office documents.</Description>
-    <RepositoryUrl>https://github.com/NetOfficeFw/VbaCompression.git</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/NetOfficeFw/VbaCompression</PackageProjectUrl>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageIcon>Icon.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
   </ItemGroup>
-
-  <!-- Source Link support -->
-  <PropertyGroup>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <ContinuousIntegrationBuild Condition=" '$(GITHUB_ACTIONS)' == 'true' ">true</ContinuousIntegrationBuild>
-  </PropertyGroup>
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
