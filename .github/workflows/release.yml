@@ -27,7 +27,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: setup dotnet
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8
 
@@ -44,7 +44,7 @@ jobs:
       run: dotnet pack --no-build --no-restore -o dist
 
     - name: publish artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: VbaCompression_packages
         path: |
@@ -57,13 +57,13 @@ jobs:
 
     steps:
     - name: download artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: VbaCompression_packages
         path: ${{ github.workspace }}
 
     - name: setup dotnet
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8
 
