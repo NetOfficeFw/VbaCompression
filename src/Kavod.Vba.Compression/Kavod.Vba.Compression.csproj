@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <PackageId>NetOfficeFw.VbaCompression</PackageId>
-    <TargetFrameworks>net48;netstandard2.0;net8.0</TargetFrameworks>
     <Description>VbaCompression library implements [MS-OVBA] Compression and Decompression algorithms used in the Office VBA File Format structures. Office VBA project contains embedded macros and custom forms for use in Microsoft Office documents.</Description>
   </PropertyGroup>
 
