@@ -65,7 +65,7 @@ jobs:
     - name: setup dotnet
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8
+        dotnet-version: 6
 
     - name: setup NuGetKeyVaultSignTool
       run: dotnet tool install --verbosity minimal --global NuGetKeyVaultSignTool --version 3.2.3
