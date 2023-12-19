@@ -68,7 +68,7 @@ jobs:
         dotnet-version: 8
 
     - name: setup NuGetKeyVaultSignTool
-      run: dotnet tool install --verbosity minimal --global NuGetKeyVaultSignTool --version 3.2.2
+      run: dotnet tool install --verbosity minimal --global NuGetKeyVaultSignTool --version 3.2.3
 
     - name: sign
       id: sign_package
