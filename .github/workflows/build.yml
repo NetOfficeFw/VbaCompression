@@ -44,7 +44,7 @@ jobs:
       run: dotnet pack --no-build --no-restore -o dist
 
     - name: publish artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: VbaCompression_${{ env.VersionSuffix }}
         path: '${{ github.workspace }}/dist'
