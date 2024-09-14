@@ -14,9 +14,9 @@ namespace Kavod.Vba.Compression.Tests
         private const string ExpectedDecompressedOutput =
             "61 62 63 64 65 66 67 68 69 6A 6B 6C 6D 6E 6F 70 71 72 73 74 75 76 2E";
 
-        private static byte[] _expectedCompressedBytes;
-        private static byte[] _expectedDecompressedBytes;
-        private static byte[] _compressionInputBytes;
+        private readonly byte[] _expectedCompressedBytes;
+        private readonly byte[] _expectedDecompressedBytes;
+        private readonly byte[] _compressionInputBytes;
 
         public NoCompression()
         {
@@ -62,9 +62,9 @@ namespace Kavod.Vba.Compression.Tests
             "23 61 61 61 62 63 64 65 66 61 61 61 61 67 68 69 6a 61 61 61 61 61 6B 6C 61 61 61 6D 6E 6F 70 71" +
             "61 61 61 61 61 61 61 61 61 61 61 61 72 73 74 75 76 77 78 79 7A 61 61 61";
 
-        private static byte[] _expectedCompressedBytes;
-        private static byte[] _expectedDecompressedBytes;
-        private static byte[] _compressionInputBytes;
+        private readonly byte[] _expectedCompressedBytes;
+        private readonly byte[] _expectedDecompressedBytes;
+        private readonly byte[] _compressionInputBytes;
         
         public NormalCompression()
         {
@@ -106,9 +106,9 @@ namespace Kavod.Vba.Compression.Tests
             "61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61" +
             "61 61 61 61 61 61 61 61 61";
 
-        private static byte[] _expectedCompressedBytes;
-        private static byte[] _expectedDecompressedBytes;
-        private static byte[] _compressionInputBytes;
+        private readonly byte[] _expectedCompressedBytes;
+        private readonly byte[] _expectedDecompressedBytes;
+        private readonly byte[] _compressionInputBytes;
         
         public MaximumCompression()
         {

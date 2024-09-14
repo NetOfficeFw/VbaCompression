@@ -6,8 +6,8 @@ namespace Kavod.Vba.Compression.Tests
 {
     public class TestCompressedContainer
     {
-        static byte[] _validCompressedDirStream;
-        static byte[] _validDecompressedDirStream;
+        private readonly byte[] _validCompressedDirStream;
+        private readonly byte[] _validDecompressedDirStream;
         
         public TestCompressedContainer()
         {
