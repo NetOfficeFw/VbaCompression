@@ -20,9 +20,7 @@ namespace Kavod.Vba.Compression.Tests
                     {
                         var tokenData = CopyToken.Pack(position, offset, length);
 
-                        UInt16 actualOffset;
-                        UInt16 actualLength;
-                        CopyToken.UnPack(tokenData, position, out actualOffset, out actualLength);
+                        CopyToken.UnPack(tokenData, position, out var actualOffset, out var actualLength);
 
                         Assert.Equal(offset, actualOffset);
                         Assert.Equal(length, actualLength);
