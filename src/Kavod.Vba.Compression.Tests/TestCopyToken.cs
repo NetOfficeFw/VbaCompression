@@ -10,7 +10,7 @@ namespace Kavod.Vba.Compression.Tests
         {
             const int increment = 5;
 
-            for (var position = 2; position < 4096; position = position + increment)
+            for (var position = 2; position < 4096; position += increment)
             {
                 for (UInt16 offset = 1; offset < position; offset = (ushort)(offset + increment))
                 {
@@ -27,7 +27,6 @@ namespace Kavod.Vba.Compression.Tests
                     }
                 }
             }
-            
         }
 
         //  Position        #bits       Max Len         #bits
@@ -61,8 +60,7 @@ namespace Kavod.Vba.Compression.Tests
         [InlineData(2048, 5, 34, 11)]
         [InlineData(2049, 4, 18, 12)]
         [InlineData(4096, 4, 18, 12)]
-        public void TestTokenHelp(int position, ushort expectedLengthBitCount, 
-            ushort expectedMaxLength, ushort expectedOffsetBitCount)
+        public void TestTokenHelp(int position, ushort expectedLengthBitCount, ushort expectedMaxLength, ushort expectedOffsetBitCount)
         {
             var result = CopyToken.CopyTokenHelp(position);
 

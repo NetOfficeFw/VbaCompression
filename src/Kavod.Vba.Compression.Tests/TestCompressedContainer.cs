@@ -8,7 +8,7 @@ namespace Kavod.Vba.Compression.Tests
     {
         private readonly byte[] _validCompressedDirStream;
         private readonly byte[] _validDecompressedDirStream;
-        
+
         public TestCompressedContainer()
         {
             _validCompressedDirStream = File.ReadAllBytes(@"Test Files/ValidCompressedDirStream");
@@ -41,7 +41,7 @@ namespace Kavod.Vba.Compression.Tests
 
             Assert.True(container.SerializeData().SequenceEqual(_validCompressedDirStream));
         }
-        
+
         [Fact(Skip = "Does not pass.")]
         public void CompressedDataSameAsMicrosoftImplementation()
         {

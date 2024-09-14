@@ -65,7 +65,7 @@ namespace Kavod.Vba.Compression.Tests
         private readonly byte[] _expectedCompressedBytes;
         private readonly byte[] _expectedDecompressedBytes;
         private readonly byte[] _compressionInputBytes;
-        
+
         public NormalCompression()
         {
             _compressionInputBytes = CompressionInputText.ToMcbsBytes(CodePage);
@@ -109,7 +109,7 @@ namespace Kavod.Vba.Compression.Tests
         private readonly byte[] _expectedCompressedBytes;
         private readonly byte[] _expectedDecompressedBytes;
         private readonly byte[] _compressionInputBytes;
-        
+
         public MaximumCompression()
         {
             _compressionInputBytes = CompressionInputText.ToMcbsBytes(CodePage);
