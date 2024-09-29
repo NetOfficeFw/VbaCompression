@@ -53,7 +53,7 @@ jobs:
     - name: publish
       working-directory: '${{ github.workspace}}/dist'
       run: |
-          dotnet nuget push "*.nupkg" --api-key $env:NUGET_PUSH_KEY --source https://api.nuget.org/v3/index.json
+          dotnet nuget push "*.nupkg" --api-key "$NUGET_PUSH_KEY" --source https://api.nuget.org/v3/index.json
       env:
         NUGET_PUSH_KEY: ${{ secrets.NUGET_PUSH_KEY }}
 
