@@ -80,8 +80,10 @@ jobs:
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-    - name: setup dotnet sign
-      run: dotnet tool install --global sign --version 0.9.1-beta.24529.1
+    - name: setup tools
+      run: |
+        dotnet tool install --global sign --version 0.9.1-beta.24529.1
+        dotnet tool install --global Knapcode.CertificateExtractor --version 0.1.1
   
     - name: sign
       run: >
@@ -100,6 +102,13 @@ jobs:
       with:
         subject-path: 'dist/*.nupkg'
         show-summary: true
+
+    - name: extract certificate
+      shell: pwsh
+      run: |
+        dotnet tool install --global Knapcode.CertificateExtractor
+        $nupkg = Get-ChildItem -Filter dist\*.nupkg | Select-Object -First 1
+        nuget-cert-extractor --file $nupkg --output dist --code-signing --author --leaf
 
     - name: publish artifact
       uses: actions/upload-artifact@v4
