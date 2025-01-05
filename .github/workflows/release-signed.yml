@@ -65,6 +65,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      attestations: write
 
     steps:
     - name: publish artifact
@@ -93,6 +94,12 @@ jobs:
         --trusted-signing-endpoint "https://weu.codesigning.azure.net/"
         --trusted-signing-account "OpenSourceSigning"
         --trusted-signing-certificate-profile "JozefIzsoOpenSourceProfile"
+
+    - name: attestation
+      uses: actions/attest-build-provenance@v2
+      with:
+        subject-path: 'dist/*.nupkg'
+        show-summary: true
 
     - name: publish artifact
       uses: actions/upload-artifact@v4
