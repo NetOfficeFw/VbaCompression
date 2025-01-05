@@ -19,10 +19,12 @@ env:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
+        os: [ ubuntu-24.04, windows-2022 ]
         configuration: [ 'Debug', 'Release' ]
 
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
 
     env:
       Configuration: ${{ matrix.configuration }}
@@ -49,6 +51,8 @@ jobs:
 
     - name: test
       run: dotnet test --no-build --no-restore
+      env:
+        TestNetCoreOnly: ${{ contains(matrix.os, 'ubuntu') }}
 
     - name: pack
       run: dotnet pack --no-build --no-restore -c ${{ matrix.configuration }} -o dist
@@ -56,5 +60,5 @@ jobs:
     - name: publish artifact
       uses: actions/upload-artifact@v4
       with:
-        name: VbaCompression_${{ env.VersionSuffix }}_${{ matrix.configuration }}
+        name: VbaCompression_${{ env.VersionSuffix }}_${{ matrix.configuration }}_${{ matrix.os }}
         path: '${{ github.workspace }}/dist'
