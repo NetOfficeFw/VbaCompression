@@ -110,6 +110,25 @@ jobs:
         $nupkg = Get-ChildItem -Filter dist\*.nupkg | Select-Object -First 1
         nuget-cert-extractor --file $nupkg --output dist --code-signing --author --leaf
 
+    - name: certificate summary
+      shell: pwsh
+      run: |
+        & {
+          echo '# NuGet Certificate Registration'
+          echo ''
+          echo 'To publish packages to NuGet.org, you must register the trusted signing certificate.'
+          echo ''
+          echo 'Download the `certificate` artifact, extract the `.cer` file and register it'
+          echo 'in your NuGet account at <https://www.nuget.org/account>'
+        } | Out-File -FilePath $env:GITHUB_STEP_SUMMARY
+
+    - name: publish certificate
+      uses: actions/upload-artifact@v4
+      with:
+        name: certificate
+        path: |
+          ${{ github.workspace }}/dist/*.cer
+
     - name: publish artifact
       uses: actions/upload-artifact@v4
       with:
