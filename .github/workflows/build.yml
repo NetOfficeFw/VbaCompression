@@ -2,7 +2,7 @@ name: build
 
 on:
   push:
-    branches: [ "main", "build" ]
+    branches: [ "main", "build", "feature/**" ]
   pull_request:
     branches: [ "main" ]
 
@@ -29,7 +29,7 @@ jobs:
     - name: setup dotnet
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8
+        dotnet-version: 10
 
     - name: restore
       run: dotnet restore
