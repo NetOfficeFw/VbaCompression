@@ -2,9 +2,9 @@ name: build
 
 on:
   push:
-    branches: [ "main", "build" ]
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -15,17 +15,25 @@ env:
   DOTNET_GENERATE_ASPNET_CERTIFICATE: 0
   ContinuousIntegrationBuild: true
   RestoreLockedMode: true
-  Configuration: Release
-  VersionSuffix: preview${{ github.run_id }}
 
 jobs:
   build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-24.04, windows-2022 ]
+        configuration: [ 'Debug', 'Release' ]
 
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
+
+    env:
+      Configuration: ${{ matrix.configuration }}
+      VersionSuffix: preview${{ github.run_id }}
 
     steps:
     - name: checkout
       uses: actions/checkout@v4
+
     - name: setup dotnet
       uses: actions/setup-dotnet@v4
       with:
@@ -39,12 +47,14 @@ jobs:
 
     - name: test
       run: dotnet test --no-build --no-restore
+      env:
+        TestNetCoreOnly: ${{ contains(matrix.os, 'ubuntu') }}
 
     - name: pack
-      run: dotnet pack --no-build --no-restore -o dist
+      run: dotnet pack --no-build --no-restore -c ${{ matrix.configuration }} -o dist
 
     - name: publish artifact
       uses: actions/upload-artifact@v4
       with:
-        name: VbaCompression_${{ env.VersionSuffix }}
+        name: VbaCompression_${{ env.VersionSuffix }}_${{ matrix.configuration }}_${{ matrix.os }}
         path: '${{ github.workspace }}/dist'
