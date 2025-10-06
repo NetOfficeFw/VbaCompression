@@ -28,15 +28,13 @@ namespace Kavod.Vba.Compression
         {
             var data = dataReader.ReadBytes(compressedChunkDataSize);
 
-            using (var reader = new BinaryReader(new MemoryStream(data)))
+            using var reader = new BinaryReader(new MemoryStream(data));
+            var position = 0;
+            while (reader.BaseStream.Position < reader.BaseStream.Length)
             {
-                var position = 0;
-                while (reader.BaseStream.Position < reader.BaseStream.Length)
-                {
-                    var sequence = TokenSequence.GetFromCompressedData(reader, position);
-                    _tokensequences.Add(sequence);
-                    position += (int)sequence.Tokens.Sum(t => t.Length);
-                }
+                var sequence = TokenSequence.GetFromCompressedData(reader, position);
+                _tokensequences.Add(sequence);
+                position += (int)sequence.Tokens.Sum(t => t.Length);
             }
         }
 

@@ -16,20 +16,18 @@ namespace Kavod.Vba.Compression
             if (compressedChunk.Header.IsCompressed)
             {
                 // Loop through all the data, get TokenSequences and decompress them.
-                using (var writer = new BinaryWriter(new MemoryStream()))
+                using var writer = new BinaryWriter(new MemoryStream());
+                var tokens = ((CompressedChunkData)compressedChunk.ChunkData).TokenSequences;
+                foreach (var sequence in tokens)
                 {
-                    var tokens = ((CompressedChunkData)compressedChunk.ChunkData).TokenSequences;
-                    foreach (var sequence in tokens)
-                    {
-                        sequence.Tokens.DecompressTokenSequence(writer);
-                    }
-
-                    var stream = (MemoryStream)writer.BaseStream;
-                    var decompressedData = stream.GetBuffer();
-                    Array.Resize(ref decompressedData, (int)stream.Length);
-
-                    Data = decompressedData;
+                    sequence.Tokens.DecompressTokenSequence(writer);
                 }
+
+                var stream = (MemoryStream)writer.BaseStream;
+                var decompressedData = stream.GetBuffer();
+                Array.Resize(ref decompressedData, (int)stream.Length);
+
+                Data = decompressedData;
             }
             else
             {
