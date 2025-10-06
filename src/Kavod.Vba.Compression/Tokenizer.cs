@@ -108,7 +108,7 @@ namespace Kavod.Vba.Compression
             }
         }
 
-        private static IEnumerable<CopyToken> NormalizeCopyTokens(IEnumerable<CopyToken> copyTokens)
+        private static List<CopyToken> NormalizeCopyTokens(IEnumerable<CopyToken> copyTokens)
         {
             var remainingTokens = RemoveRedundantTokens(copyTokens).ToList();
 

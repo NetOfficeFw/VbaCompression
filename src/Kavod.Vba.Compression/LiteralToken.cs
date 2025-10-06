@@ -20,7 +20,7 @@ namespace Kavod.Vba.Compression
 
         internal LiteralToken(byte data)
         {
-            _data = new [] { data };
+            _data = [data];
         }
 
         public void DecompressToken(BinaryWriter writer)

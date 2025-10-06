@@ -18,7 +18,7 @@ namespace Kavod.Vba.Compression
     {
         private const byte SignatureByteSig = 0x1;
 
-        private readonly List<CompressedChunk> _compressedChunks = new List<CompressedChunk>();
+        private readonly List<CompressedChunk> _compressedChunks = [];
         
         internal CompressedContainer(byte[] compressedData)
         {
