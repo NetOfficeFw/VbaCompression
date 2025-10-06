@@ -19,7 +19,7 @@ var compressedBytes = VbaCompression.Compress(contentBytes);
 
 ### Requirements
 
-Library works with .NET Framework 4.6.2 and 4.8, and .NET 8 runtimes.
+Library targets the .NET 10 runtime.
 
 
 ### Legal
