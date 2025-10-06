@@ -18,10 +18,7 @@ namespace Kavod.Vba.Compression
 
         internal CompressedChunkData(DecompressedChunk chunk)
         {
-            if (chunk == null)
-            {
-                throw new ArgumentNullException(nameof(chunk));
-            }
+            ArgumentNullException.ThrowIfNull(chunk);
 
             var tokens = Tokenizer.TokenizeUncompressedData(chunk.Data);
             _tokensequences.AddRange(tokens.ToTokenSequences());

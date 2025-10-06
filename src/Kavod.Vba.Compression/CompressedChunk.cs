@@ -16,10 +16,7 @@ namespace Kavod.Vba.Compression
     {
         internal CompressedChunk(DecompressedChunk decompressedChunk)
         {
-            if (decompressedChunk == null)
-            {
-                throw new ArgumentNullException(nameof(decompressedChunk));
-            }
+            ArgumentNullException.ThrowIfNull(decompressedChunk);
 
             ChunkData = new CompressedChunkData(decompressedChunk);
             if (ChunkData.Size >= Globals.MaxBytesPerChunk)
@@ -31,10 +28,7 @@ namespace Kavod.Vba.Compression
 
         internal CompressedChunk(BinaryReader dataReader)
         {
-            if (dataReader == null)
-            {
-                throw new ArgumentNullException(nameof(dataReader));
-            }
+            ArgumentNullException.ThrowIfNull(dataReader);
 
             Header = new CompressedChunkHeader(dataReader);
             if (Header.IsCompressed)
