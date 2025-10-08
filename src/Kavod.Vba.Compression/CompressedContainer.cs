@@ -18,7 +18,7 @@ namespace Kavod.Vba.Compression
     {
         private const byte SignatureByteSig = 0x1;
 
-        private readonly List<CompressedChunk> _compressedChunks = new List<CompressedChunk>();
+        private readonly List<CompressedChunk> _compressedChunks = [];
         
         internal CompressedContainer(byte[] compressedData)
         {
@@ -47,21 +47,17 @@ namespace Kavod.Vba.Compression
 
         internal byte[] SerializeData()
         {
-            using (var writer = new BinaryWriter(new MemoryStream()))
+            using var writer = new BinaryWriter(new MemoryStream());
+            writer.Write(SignatureByteSig);
+
+            foreach (var chunk in CompressedChunks)
             {
-                writer.Write(SignatureByteSig);
-
-                foreach (var chunk in CompressedChunks)
-                {
-                    writer.Write(chunk.SerializeData());
-                }
-
-                using (var reader = new BinaryReader(writer.BaseStream))
-                {
-                    reader.BaseStream.Position = 0;
-                    return reader.ReadBytes((int) reader.BaseStream.Length);
-                }
+                writer.Write(chunk.SerializeData());
             }
+
+            using var reader = new BinaryReader(writer.BaseStream);
+            reader.BaseStream.Position = 0;
+            return reader.ReadBytes((int)reader.BaseStream.Length);
         }
     }
 }

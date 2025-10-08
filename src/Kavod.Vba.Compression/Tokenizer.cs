@@ -108,7 +108,7 @@ namespace Kavod.Vba.Compression
             }
         }
 
-        private static IEnumerable<CopyToken> NormalizeCopyTokens(IEnumerable<CopyToken> copyTokens)
+        private static List<CopyToken> NormalizeCopyTokens(IEnumerable<CopyToken> copyTokens)
         {
             var remainingTokens = RemoveRedundantTokens(copyTokens).ToList();
 
@@ -162,10 +162,7 @@ namespace Kavod.Vba.Compression
 
         private static Node FindBestPath(Node node)
         {
-            if (node == null)
-            {
-                throw new ArgumentNullException(nameof(node));
-            }
+            ArgumentNullException.ThrowIfNull(node);
 
             // find any overlapping tokens
             Node bestPath = null;
@@ -191,10 +188,7 @@ namespace Kavod.Vba.Compression
 
         private static IEnumerable<Node> GetOverlappingNodes(Node node)
         {
-            if (node == null)
-            {
-                throw new ArgumentNullException(nameof(node));
-            }
+            ArgumentNullException.ThrowIfNull(node);
 
             var firstNode = node;
 
@@ -208,10 +202,7 @@ namespace Kavod.Vba.Compression
 
         private static Node GetNextNonOverlappingNode(Node node)
         {
-            if (node == null)
-            {
-                throw new ArgumentNullException(nameof(node));
-            }
+            ArgumentNullException.ThrowIfNull(node);
 
             var firstNode = node;
 
@@ -322,10 +313,7 @@ namespace Kavod.Vba.Compression
         {
             public Node(CopyToken value, Node nextNode)
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
+                ArgumentNullException.ThrowIfNull(value);
 
                 Value = value;
                 NextNode = nextNode;

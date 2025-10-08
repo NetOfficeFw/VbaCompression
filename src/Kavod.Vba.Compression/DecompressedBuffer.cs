@@ -12,13 +12,11 @@ namespace Kavod.Vba.Compression
     {
         internal DecompressedBuffer(byte[] uncompressedData)
         {
-            using (var reader = new BinaryReader(new MemoryStream(uncompressedData)))
+            using var reader = new BinaryReader(new MemoryStream(uncompressedData));
+            while (reader.BaseStream.Position < reader.BaseStream.Length)
             {
-                while (reader.BaseStream.Position < reader.BaseStream.Length)
-                {
-                    var chunk = new DecompressedChunk(reader);
-                    DecompressedChunks.Add(chunk);
-                }
+                var chunk = new DecompressedChunk(reader);
+                DecompressedChunks.Add(chunk);
             }
         }
 
@@ -36,20 +34,16 @@ namespace Kavod.Vba.Compression
         {
             get
             {
-                using (var writer = new BinaryWriter(new MemoryStream()))
+                using var writer = new BinaryWriter(new MemoryStream());
+                foreach (var chunk in DecompressedChunks)
                 {
-                    foreach (var chunk in DecompressedChunks)
-                    {
-                        writer.Write(chunk.Data);
-                    }
-
-                    using (var reader = new BinaryReader(writer.BaseStream))
-                    {
-                        reader.BaseStream.Position = 0;
-
-                        return reader.ReadBytes((int) reader.BaseStream.Length);
-                    }
+                    writer.Write(chunk.Data);
                 }
+
+                using var reader = new BinaryReader(writer.BaseStream);
+                reader.BaseStream.Position = 0;
+
+                return reader.ReadBytes((int)reader.BaseStream.Length);
             }
         }
     }
