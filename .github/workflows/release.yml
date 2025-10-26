@@ -48,7 +48,7 @@ jobs:
       run: dotnet pack --no-build --no-restore -o dist
 
     - name: publish artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: VbaCompression_packages
         path: |
