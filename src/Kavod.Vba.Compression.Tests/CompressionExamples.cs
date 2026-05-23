@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Xunit;
 
 namespace Kavod.Vba.Compression.Tests
 {
@@ -25,28 +24,28 @@ namespace Kavod.Vba.Compression.Tests
             _expectedCompressedBytes = Extensions.StringToByteArray(ExpectedCompressedOutput.Replace(" ", ""));
         }
 
-        [Fact]
-        public void InputValueAndDecompressedOutputAreSame()
+        [Test]
+        public async Task InputValueAndDecompressedOutputAreSame()
         {
-            Assert.True(_expectedDecompressedBytes.SequenceEqual(_compressionInputBytes));
+            await Assert.That(_expectedDecompressedBytes.SequenceEqual(_compressionInputBytes)).IsTrue();
         }
 
-        [Fact]
-        public void CompressionProducesExpectedOutput()
+        [Test]
+        public async Task CompressionProducesExpectedOutput()
         {
             var compressed = VbaCompression.Compress(_compressionInputBytes);
 
-            Assert.Equal(_expectedCompressedBytes.Length, compressed.Length);
-            Assert.True(_expectedCompressedBytes.SequenceEqual(compressed));
+            await Assert.That(compressed.Length).IsEqualTo(_expectedCompressedBytes.Length);
+            await Assert.That(_expectedCompressedBytes.SequenceEqual(compressed)).IsTrue();
         }
 
-        [Fact]
-        public void DecompressionProducesExpectedOutput()
+        [Test]
+        public async Task DecompressionProducesExpectedOutput()
         {
             var decompressed = VbaCompression.Decompress(_expectedCompressedBytes);
 
-            Assert.Equal(_expectedDecompressedBytes.Length, _compressionInputBytes.Length);
-            Assert.True(_expectedDecompressedBytes.SequenceEqual(_compressionInputBytes));
+            await Assert.That(_compressionInputBytes.Length).IsEqualTo(_expectedDecompressedBytes.Length);
+            await Assert.That(_expectedDecompressedBytes.SequenceEqual(_compressionInputBytes)).IsTrue();
         }
     }
 
@@ -73,25 +72,26 @@ namespace Kavod.Vba.Compression.Tests
             _expectedCompressedBytes = Extensions.StringToByteArray(ExpectedCompressedOutput.Replace(" ", ""));
         }
 
-        [Fact]
-        public void InputValueAndDecompressedOutputAreSame()
+        [Test]
+        public async Task InputValueAndDecompressedOutputAreSame()
         {
-            Assert.True(_expectedDecompressedBytes.SequenceEqual(_compressionInputBytes));
+            await Assert.That(_expectedDecompressedBytes.SequenceEqual(_compressionInputBytes)).IsTrue();
         }
 
-        [Fact(Skip = "Does not pass.")]
-        public void CompressionProducesExpectedOutput()
+        [Test]
+        [Skip("Does not pass.")]
+        public async Task CompressionProducesExpectedOutput()
         {
-            CompressionTestHelper.LowLevelCompressionComparison(_expectedDecompressedBytes, _expectedCompressedBytes);
+            await CompressionTestHelper.LowLevelCompressionComparison(_expectedDecompressedBytes, _expectedCompressedBytes);
         }
 
-        [Fact]
-        public void DecompressionProducesExpectedOutput()
+        [Test]
+        public async Task DecompressionProducesExpectedOutput()
         {
             var decompressed = VbaCompression.Decompress(_expectedCompressedBytes);
 
-            Assert.Equal(_expectedDecompressedBytes.Length, decompressed.Length);
-            Assert.True(_expectedDecompressedBytes.SequenceEqual(decompressed));
+            await Assert.That(decompressed.Length).IsEqualTo(_expectedDecompressedBytes.Length);
+            await Assert.That(_expectedDecompressedBytes.SequenceEqual(decompressed)).IsTrue();
         }
     }
 
@@ -117,28 +117,28 @@ namespace Kavod.Vba.Compression.Tests
             _expectedCompressedBytes = Extensions.StringToByteArray(ExpectedCompressedOutput.Replace(" ", ""));
         }
 
-        [Fact]
-        public void InputValueAndDecompressedOutputAreSame()
+        [Test]
+        public async Task InputValueAndDecompressedOutputAreSame()
         {
-            Assert.True(_expectedDecompressedBytes.SequenceEqual(_compressionInputBytes));
+            await Assert.That(_expectedDecompressedBytes.SequenceEqual(_compressionInputBytes)).IsTrue();
         }
 
-        [Fact]
-        public void CompressionProducesExpectedOutput()
+        [Test]
+        public async Task CompressionProducesExpectedOutput()
         {
             var compressed = VbaCompression.Compress(_compressionInputBytes);
 
-            Assert.Equal(_expectedCompressedBytes.Length, compressed.Length);
-            Assert.True(_expectedCompressedBytes.SequenceEqual(compressed));
+            await Assert.That(compressed.Length).IsEqualTo(_expectedCompressedBytes.Length);
+            await Assert.That(_expectedCompressedBytes.SequenceEqual(compressed)).IsTrue();
         }
 
-        [Fact]
-        public void DecompressionProducesExpectedOutput()
+        [Test]
+        public async Task DecompressionProducesExpectedOutput()
         {
             var decompressed = VbaCompression.Decompress(_expectedCompressedBytes);
 
-            Assert.Equal(_expectedDecompressedBytes.Length, _compressionInputBytes.Length);
-            Assert.True(_expectedDecompressedBytes.SequenceEqual(_compressionInputBytes));
+            await Assert.That(_compressionInputBytes.Length).IsEqualTo(_expectedDecompressedBytes.Length);
+            await Assert.That(_expectedDecompressedBytes.SequenceEqual(_compressionInputBytes)).IsTrue();
         }
     }
 }

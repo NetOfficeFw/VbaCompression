@@ -1,12 +1,11 @@
 ﻿using System;
-using Xunit;
 
 namespace Kavod.Vba.Compression.Tests
 {
     public class TestCopyToken
     {
-        [Fact]
-        public void GivenRangeOfPositionOffsetAndLengthPackingThenunPackingDataProducesTheOriginalParameters()
+        [Test]
+        public async Task GivenRangeOfPositionOffsetAndLengthPackingThenunPackingDataProducesTheOriginalParameters()
         {
             const int increment = 5;
 
@@ -22,8 +21,8 @@ namespace Kavod.Vba.Compression.Tests
 
                         CopyToken.UnPack(tokenData, position, out var actualOffset, out var actualLength);
 
-                        Assert.Equal(offset, actualOffset);
-                        Assert.Equal(length, actualLength);
+                        await Assert.That(actualOffset).IsEqualTo(offset);
+                        await Assert.That(actualLength).IsEqualTo(length);
                     }
                 }
             }
@@ -41,32 +40,32 @@ namespace Kavod.Vba.Compression.Tests
         //  513 - 1024      6           66              10
         //  1025 - 2048     5           34              11
         //  2049 - 4096     4           18              12
-        [Theory]
-        [InlineData(1, 12, 4098, 4)]
-        [InlineData(16, 12, 4098, 4)]
-        [InlineData(17, 11, 2050, 5)]
-        [InlineData(32, 11, 2050, 5)]
-        [InlineData(33, 10, 1026, 6)]
-        [InlineData(64, 10, 1026, 6)]
-        [InlineData(65, 9, 514, 7)]
-        [InlineData(128, 9, 514, 7)]
-        [InlineData(129, 8, 258, 8)]
-        [InlineData(256, 8, 258, 8)]
-        [InlineData(257, 7, 130, 9)]
-        [InlineData(512, 7, 130, 9)]
-        [InlineData(513, 6, 66, 10)]
-        [InlineData(1024, 6, 66, 10)]
-        [InlineData(1025, 5, 34, 11)]
-        [InlineData(2048, 5, 34, 11)]
-        [InlineData(2049, 4, 18, 12)]
-        [InlineData(4096, 4, 18, 12)]
-        public void TestTokenHelp(int position, ushort expectedLengthBitCount, ushort expectedMaxLength, ushort expectedOffsetBitCount)
+        [Test]
+        [Arguments(1, 12, 4098, 4)]
+        [Arguments(16, 12, 4098, 4)]
+        [Arguments(17, 11, 2050, 5)]
+        [Arguments(32, 11, 2050, 5)]
+        [Arguments(33, 10, 1026, 6)]
+        [Arguments(64, 10, 1026, 6)]
+        [Arguments(65, 9, 514, 7)]
+        [Arguments(128, 9, 514, 7)]
+        [Arguments(129, 8, 258, 8)]
+        [Arguments(256, 8, 258, 8)]
+        [Arguments(257, 7, 130, 9)]
+        [Arguments(512, 7, 130, 9)]
+        [Arguments(513, 6, 66, 10)]
+        [Arguments(1024, 6, 66, 10)]
+        [Arguments(1025, 5, 34, 11)]
+        [Arguments(2048, 5, 34, 11)]
+        [Arguments(2049, 4, 18, 12)]
+        [Arguments(4096, 4, 18, 12)]
+        public async Task TestTokenHelp(int position, int expectedLengthBitCount, int expectedMaxLength, int expectedOffsetBitCount)
         {
             var result = CopyToken.CopyTokenHelp(position);
 
-            Assert.Equal(expectedLengthBitCount, result.LengthBitCount);
-            Assert.Equal(expectedMaxLength, result.MaximumLength);
-            Assert.Equal(expectedOffsetBitCount, result.BitCount);
+            await Assert.That((int)result.LengthBitCount).IsEqualTo(expectedLengthBitCount);
+            await Assert.That((int)result.MaximumLength).IsEqualTo(expectedMaxLength);
+            await Assert.That((int)result.BitCount).IsEqualTo(expectedOffsetBitCount);
         }
     }
 }

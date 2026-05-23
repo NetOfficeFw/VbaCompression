@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
-using Xunit;
 
 namespace Kavod.Vba.Compression.Tests
 {
     public static class CompressionTestHelper
     {
-        public static void LowLevelCompressionComparison(byte[] decompressedBytes, byte[] expectedCompressedBytes)
+        public static async Task LowLevelCompressionComparison(byte[] decompressedBytes, byte[] expectedCompressedBytes)
         {
             var refCompressed = new CompressedContainer(expectedCompressedBytes);
             var decompressed = new DecompressedBuffer(decompressedBytes);
@@ -15,12 +14,11 @@ namespace Kavod.Vba.Compression.Tests
             var refTokens = GetTokensFromCompressedContainer(refCompressed).OfType<CopyToken>().ToList();
             var sutTokens = GetTokensFromCompressedContainer(sutCompressed).OfType<CopyToken>().ToList();
 
-            //Assert.Equal(refTokens.Count, sutTokens.Count);
             for (var i = 0; i < refTokens.Count; i++)
             {
                 var expected = refTokens[i];
                 var actual = sutTokens[i];
-                Assert.Equal(expected, actual);
+                await Assert.That(actual).IsEqualTo(expected);
             }
         }
 
