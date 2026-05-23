@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Kavod.Vba.Compression
 {
@@ -19,14 +20,21 @@ namespace Kavod.Vba.Compression
         private const byte SignatureByteSig = 0x1;
 
         private readonly List<CompressedChunk> _compressedChunks = [];
-        
+
         internal CompressedContainer(byte[] compressedData)
         {
-            var reader = new BinaryReader(new MemoryStream(compressedData));
+            ArgumentNullException.ThrowIfNull(compressedData);
+
+            if (compressedData.Length == 0)
+            {
+                throw new InvalidDataException("Compressed container is empty.");
+            }
+
+            using var reader = new BinaryReader(new MemoryStream(compressedData, writable: false));
 
             if (reader.ReadByte() != SignatureByteSig)
             {
-                throw new Exception();
+                throw new InvalidDataException("Invalid compressed container signature byte.");
             }
 
             while (reader.BaseStream.Position < reader.BaseStream.Length)
@@ -37,6 +45,8 @@ namespace Kavod.Vba.Compression
 
         internal CompressedContainer(DecompressedBuffer buffer)
         {
+            ArgumentNullException.ThrowIfNull(buffer);
+
             foreach (var chunk in buffer.DecompressedChunks)
             {
                 _compressedChunks.Add(new CompressedChunk(chunk));
@@ -47,17 +57,15 @@ namespace Kavod.Vba.Compression
 
         internal byte[] SerializeData()
         {
-            using var writer = new BinaryWriter(new MemoryStream());
-            writer.Write(SignatureByteSig);
+            using var stream = new MemoryStream(1 + _compressedChunks.Sum(c => c.SerializedSize));
+            stream.WriteByte(SignatureByteSig);
 
             foreach (var chunk in CompressedChunks)
             {
-                writer.Write(chunk.SerializeData());
+                chunk.WriteTo(stream);
             }
 
-            using var reader = new BinaryReader(writer.BaseStream);
-            reader.BaseStream.Position = 0;
-            return reader.ReadBytes((int)reader.BaseStream.Length);
+            return stream.ToArray();
         }
     }
 }

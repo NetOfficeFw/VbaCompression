@@ -25,9 +25,9 @@ namespace Kavod.Vba.Compression.Tests
         private static IEnumerable<IToken> GetTokensFromCompressedContainer(CompressedContainer refCompressed)
         {
             var refTokens = from c in refCompressed.CompressedChunks
-                from s in ((CompressedChunkData)c.ChunkData).TokenSequences
-                from t in s.Tokens
-                select t;
+                            from s in ((CompressedChunkData)c.ChunkData).TokenSequences
+                            from t in s.Tokens
+                            select t;
             return refTokens;
         }
     }

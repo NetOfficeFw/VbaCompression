@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace Kavod.Vba.Compression
 {
@@ -38,6 +38,21 @@ namespace Kavod.Vba.Compression
 
         internal CopyToken(long tokenPosition, UInt16 tokenOffset, UInt16 tokenLength)
         {
+            if (tokenPosition < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(tokenPosition), tokenPosition, "Token position must not be negative.");
+            }
+
+            if (tokenOffset == 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(tokenOffset), tokenOffset, "Copy token offset must be at least 1.");
+            }
+
+            if (tokenLength < 3)
+            {
+                throw new ArgumentOutOfRangeException(nameof(tokenLength), tokenLength, "Copy token length must be at least 3.");
+            }
+
             Position = tokenPosition;
             _tokenOffset = tokenOffset;
             _tokenLength = tokenLength;
@@ -53,7 +68,7 @@ namespace Kavod.Vba.Compression
         internal CopyToken(BinaryReader dataReader, long position)
         {
             Position = position;
-            CopyToken.UnPack(dataReader.ReadUInt16(), Position, out _tokenOffset, out _tokenLength);
+            CopyToken.UnPack(BinaryUtilities.ReadUInt16LittleEndian(dataReader, "copy token"), Position, out _tokenOffset, out _tokenLength);
         }
 
         public long Length => _tokenLength;
@@ -67,8 +82,14 @@ namespace Kavod.Vba.Compression
             // 2.4.1.3.19.3 Pack CopyToken
             var result = CopyTokenHelp(position);
 
+            if (offset == 0)
+                throw new ArgumentOutOfRangeException(nameof(offset), offset, "Copy token offset must be at least 1.");
+            if (offset > position)
+                throw new ArgumentOutOfRangeException(nameof(offset), offset, "Copy token offset must not exceed the token position.");
+            if (length < 3)
+                throw new ArgumentOutOfRangeException(nameof(length), length, "Copy token length must be at least 3.");
             if (length > result.MaximumLength)
-                throw new Exception();
+                throw new ArgumentOutOfRangeException(nameof(length), length, $"Copy token length must not exceed {result.MaximumLength} at position {position}.");
 
             //SET temp1 TO Offset MINUS 1
             var temp1 = (UInt16)(offset - 1);
@@ -83,30 +104,20 @@ namespace Kavod.Vba.Compression
             return (UInt16)((temp1 << temp2) | temp3);
         }
 
-        public void DecompressToken(BinaryWriter writer)
+        public void DecompressToken(List<byte> output)
         {
-            // It is possible that the length is greater than the offset which means we would need to
-            // read more bytes than are available.  To handle this we need to read the bytes available
-            // (ie Offset amount) and then pad the remaining length with copies of the data read from 
-            // the beginning of the buffer.
+            ArgumentNullException.ThrowIfNull(output);
 
-            var streamPosition = writer.BaseStream.Position;
-            var reader = new BinaryReader(writer.BaseStream, Encoding.Unicode, true);
-            reader.BaseStream.Position = streamPosition - _tokenOffset;
-            var copySequence = reader.ReadBytes(Math.Min(_tokenOffset, _tokenLength));
-
-            Array.Resize(ref copySequence, _tokenLength);
-
-            for (int i = _tokenOffset; i <= _tokenLength - 1; i++)
+            if (_tokenOffset > output.Count)
             {
-                var copyByte = copySequence[i % _tokenOffset];
-                copySequence[i] = copyByte;
+                throw new InvalidDataException($"Copy token offset {_tokenOffset} exceeds decompressed byte count {output.Count}.");
             }
 
-            // Move the position of the underlying stream back to the original position and write the
-            // CopySequence.
-            writer.BaseStream.Position = streamPosition;
-            writer.Write(copySequence);
+            var copySource = output.Count - _tokenOffset;
+            for (var i = 0; i < _tokenLength; i++)
+            {
+                output.Add(output[copySource + i]);
+            }
         }
 
         internal static void UnPack(UInt16 packedToken, long position, out UInt16 unpackedOffset, out UInt16 unpackedLength)
@@ -137,6 +148,11 @@ namespace Kavod.Vba.Compression
         /// </summary>
         internal static CopyTokenHelpResult CopyTokenHelp(long difference)
         {
+            if (difference < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(difference), difference, "Position difference must not be negative.");
+            }
+
             var result = new CopyTokenHelpResult();
 
             // SET BitCount TO the smallest integer that is GREATER THAN OR EQUAL TO LOGARITHM base 2 
@@ -153,7 +169,7 @@ namespace Kavod.Vba.Compression
             if (result.BitCount < 4)
                 result.BitCount = 4;
             if (result.BitCount > 12)
-                throw new Exception();
+                throw new InvalidDataException($"Copy token position difference {difference} requires too many offset bits.");
 
             // SET LengthMask TO 0xFFFF RIGHT SHIFT BY BitCount
             result.LengthMask = (UInt16)(0xffff >> result.BitCount);
@@ -170,8 +186,17 @@ namespace Kavod.Vba.Compression
         public byte[] SerializeData()
         {
             var packedData = Pack(Position, _tokenOffset, _tokenLength);
-            return BitConverter.GetBytes(packedData);
+            return BinaryUtilities.GetUInt16LittleEndianBytes(packedData);
         }
+
+        public void WriteTo(Stream stream)
+        {
+            ArgumentNullException.ThrowIfNull(stream);
+
+            BinaryUtilities.WriteUInt16LittleEndian(stream, Pack(Position, _tokenOffset, _tokenLength));
+        }
+
+        public int SerializedSize => sizeof(ushort);
 
         #region Nested Classes
 
@@ -187,27 +212,27 @@ namespace Kavod.Vba.Compression
         #endregion
 
         #region IEquatable
-        public static bool operator !=(CopyToken first, CopyToken second)
+        public static bool operator !=(CopyToken? first, CopyToken? second)
         {
             return !(first == second);
         }
 
-        public static bool operator ==(CopyToken first, CopyToken second)
+        public static bool operator ==(CopyToken? first, CopyToken? second)
         {
             return Equals(first, second);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return Equals(obj as CopyToken);
         }
 
-        public bool Equals(IToken other)
+        public bool Equals(IToken? other)
         {
             return Equals(other as CopyToken);
         }
 
-        public bool Equals(CopyToken other)
+        public bool Equals(CopyToken? other)
         {
             if (ReferenceEquals(other, null))
             {
@@ -220,7 +245,7 @@ namespace Kavod.Vba.Compression
 
         public override int GetHashCode()
         {
-            return Position.GetHashCode() ^ Length.GetHashCode() ^ Offset.GetHashCode();
+            return HashCode.Combine(Position, Length, Offset);
         }
         #endregion
     }

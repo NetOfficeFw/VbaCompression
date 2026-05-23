@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Kavod.Vba.Compression
 {
@@ -12,7 +14,9 @@ namespace Kavod.Vba.Compression
     {
         internal DecompressedBuffer(byte[] uncompressedData)
         {
-            using var reader = new BinaryReader(new MemoryStream(uncompressedData));
+            ArgumentNullException.ThrowIfNull(uncompressedData);
+
+            using var reader = new BinaryReader(new MemoryStream(uncompressedData, writable: false));
             while (reader.BaseStream.Position < reader.BaseStream.Length)
             {
                 var chunk = new DecompressedChunk(reader);
@@ -22,6 +26,8 @@ namespace Kavod.Vba.Compression
 
         internal DecompressedBuffer(CompressedContainer container)
         {
+            ArgumentNullException.ThrowIfNull(container);
+
             foreach (var chunk in container.CompressedChunks)
             {
                 DecompressedChunks.Add(new DecompressedChunk(chunk));
@@ -34,16 +40,13 @@ namespace Kavod.Vba.Compression
         {
             get
             {
-                using var writer = new BinaryWriter(new MemoryStream());
+                using var stream = new MemoryStream(DecompressedChunks.Sum(c => c.Data.Length));
                 foreach (var chunk in DecompressedChunks)
                 {
-                    writer.Write(chunk.Data);
+                    stream.Write(chunk.Data);
                 }
 
-                using var reader = new BinaryReader(writer.BaseStream);
-                reader.BaseStream.Position = 0;
-
-                return reader.ReadBytes((int)reader.BaseStream.Length);
+                return stream.ToArray();
             }
         }
     }

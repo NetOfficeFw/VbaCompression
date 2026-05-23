@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 
 namespace Kavod.Vba.Compression
 {
@@ -37,7 +36,7 @@ namespace Kavod.Vba.Compression
             }
             else
             {
-                ChunkData = new RawChunk(dataReader.ReadBytes(Header.CompressedChunkDataSize));
+                ChunkData = new RawChunk(BinaryUtilities.ReadExactly(dataReader, Header.CompressedChunkDataSize, "raw chunk data"));
             }
         }
 
@@ -47,20 +46,30 @@ namespace Kavod.Vba.Compression
 
         internal byte[] SerializeData()
         {
-            var serializedHeader = Header.SerializeData();
-            var serializedChunkData = ChunkData.SerializeData();
+            using var stream = new MemoryStream(SerializedSize);
+            WriteTo(stream);
+            return stream.ToArray();
+        }
 
-            var data = serializedHeader.Concat(serializedChunkData);
+        internal void WriteTo(Stream stream)
+        {
+            ArgumentNullException.ThrowIfNull(stream);
+
+            Header.WriteTo(stream);
+            ChunkData.WriteTo(stream);
+
             if (!Header.IsCompressed)
             {
-                var dataLength = serializedHeader.LongLength + serializedChunkData.LongLength;
-                var paddingLength = Globals.NumberOfChunkHeaderBytes
-                                    + Globals.MaxBytesPerChunk
-                                    - dataLength;
-                var padding = Enumerable.Repeat(Globals.PaddingByte, (int)paddingLength);
-                data = data.Concat(padding);
+                var paddingLength = SerializedSize - Globals.NumberOfChunkHeaderBytes - ChunkData.Size;
+                if (paddingLength > 0)
+                {
+                    stream.Write(new byte[paddingLength]);
+                }
             }
-            return data.ToArray();
         }
+
+        internal int SerializedSize => Header.IsCompressed
+            ? Globals.NumberOfChunkHeaderBytes + ChunkData.Size
+            : Globals.NumberOfChunkHeaderBytes + Globals.MaxBytesPerChunk;
     }
 }

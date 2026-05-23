@@ -26,13 +26,13 @@ namespace Kavod.Vba.Compression
 
         internal CompressedChunkData(BinaryReader dataReader, UInt16 compressedChunkDataSize)
         {
-            var data = dataReader.ReadBytes(compressedChunkDataSize);
+            var data = BinaryUtilities.ReadExactly(dataReader, compressedChunkDataSize, "compressed chunk data");
 
             using var reader = new BinaryReader(new MemoryStream(data));
             var position = 0;
             while (reader.BaseStream.Position < reader.BaseStream.Length)
             {
-                var sequence = TokenSequence.GetFromCompressedData(reader, position);
+                var sequence = TokenSequence.GetFromCompressedData(reader, position, reader.BaseStream.Length);
                 _tokensequences.Add(sequence);
                 position += (int)sequence.Tokens.Sum(t => t.Length);
             }
@@ -42,14 +42,21 @@ namespace Kavod.Vba.Compression
 
         public byte[] SerializeData()
         {
-            // get data from TokenSequences.
-            var data = from t in _tokensequences
-                       from d in t.SerializeData()
-                       select d;
-            return data.ToArray();
+            using var stream = new MemoryStream(Size);
+            WriteTo(stream);
+            return stream.ToArray();
         }
 
-        // TODO this is probably really inefficient.
-        public int Size => SerializeData().Length;
+        public void WriteTo(Stream stream)
+        {
+            ArgumentNullException.ThrowIfNull(stream);
+
+            foreach (var sequence in _tokensequences)
+            {
+                sequence.WriteTo(stream);
+            }
+        }
+
+        public int Size => _tokensequences.Sum(t => t.SerializedSize);
     }
 }

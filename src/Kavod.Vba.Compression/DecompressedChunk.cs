@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Kavod.Vba.Compression
@@ -13,21 +14,22 @@ namespace Kavod.Vba.Compression
     {
         internal DecompressedChunk(CompressedChunk compressedChunk)
         {
+            ArgumentNullException.ThrowIfNull(compressedChunk);
+
             if (compressedChunk.Header.IsCompressed)
             {
-                // Loop through all the data, get TokenSequences and decompress them.
-                using var writer = new BinaryWriter(new MemoryStream());
+                var decompressedData = new List<byte>(Globals.MaxBytesPerChunk);
                 var tokens = ((CompressedChunkData)compressedChunk.ChunkData).TokenSequences;
                 foreach (var sequence in tokens)
                 {
-                    sequence.Tokens.DecompressTokenSequence(writer);
+                    sequence.Tokens.DecompressTokenSequence(decompressedData);
+                    if (decompressedData.Count > Globals.MaxBytesPerChunk)
+                    {
+                        throw new InvalidDataException($"Decompressed chunk exceeded {Globals.MaxBytesPerChunk} bytes.");
+                    }
                 }
 
-                var stream = (MemoryStream)writer.BaseStream;
-                var decompressedData = stream.GetBuffer();
-                Array.Resize(ref decompressedData, (int)stream.Length);
-
-                Data = decompressedData;
+                Data = decompressedData.ToArray();
             }
             else
             {
@@ -37,12 +39,14 @@ namespace Kavod.Vba.Compression
 
         internal DecompressedChunk(BinaryReader reader)
         {
+            ArgumentNullException.ThrowIfNull(reader);
+
             var bytesToRead = reader.BaseStream.Length - reader.BaseStream.Position;
 
             if (bytesToRead > Globals.MaxBytesPerChunk)
                 bytesToRead = Globals.MaxBytesPerChunk;
 
-            Data = reader.ReadBytes((int) bytesToRead);
+            Data = BinaryUtilities.ReadExactly(reader, (int)bytesToRead, "decompressed chunk");
         }
 
         internal byte[] Data { get; }

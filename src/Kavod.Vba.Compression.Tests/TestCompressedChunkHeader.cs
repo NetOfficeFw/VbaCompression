@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
 namespace Kavod.Vba.Compression.Tests
 {
@@ -8,13 +7,12 @@ namespace Kavod.Vba.Compression.Tests
         [Test]
         public async Task DecodeEncodeHeader()
         {
-            var data = BitConverter.ToUInt16(new byte[] {
-            0x50,
-            0xb2
-            }, 0);
+            const ushort data = 0xb250;
+            byte[] expectedBytes = [0x50, 0xb2];
+
             var header = new CompressedChunkHeader(data);
 
-            await Assert.That(BitConverter.GetBytes(data).SequenceEqual(header.SerializeData())).IsTrue();
+            await Assert.That(expectedBytes.SequenceEqual(header.SerializeData())).IsTrue();
         }
     }
 }

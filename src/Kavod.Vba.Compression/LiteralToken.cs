@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace Kavod.Vba.Compression
 {
@@ -11,64 +11,75 @@ namespace Kavod.Vba.Compression
     /// <remarks></remarks>
     internal class LiteralToken : IToken, IEquatable<LiteralToken>
     {
-        private readonly byte[] _data;
+        private readonly byte _data;
 
         internal LiteralToken(BinaryReader dataReader)
         {
-            _data = dataReader.ReadBytes(1);
+            _data = BinaryUtilities.ReadExactly(dataReader, 1, "literal token")[0];
         }
 
         internal LiteralToken(byte data)
         {
-            _data = [data];
+            _data = data;
         }
 
-        public void DecompressToken(BinaryWriter writer)
+        public void DecompressToken(List<byte> output)
         {
-            writer.Write(_data);
-            writer.Flush();
+            ArgumentNullException.ThrowIfNull(output);
+
+            output.Add(_data);
         }
 
         public byte[] SerializeData()
         {
-            return _data;
+            return [_data];
+        }
+
+        public void WriteTo(Stream stream)
+        {
+            ArgumentNullException.ThrowIfNull(stream);
+
+            stream.WriteByte(_data);
         }
 
         public long Length => 1L;
 
+        public int SerializedSize => 1;
+
         #region IEquatable
-        public static bool operator !=(LiteralToken first, LiteralToken second)
+        public static bool operator !=(LiteralToken? first, LiteralToken? second)
         {
             return !(first == second);
         }
 
-        public static bool operator ==(LiteralToken first, LiteralToken second)
+        public static bool operator ==(LiteralToken? first, LiteralToken? second)
         {
             return Equals(first, second);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return Equals(obj as LiteralToken);
         }
 
-        public bool Equals(IToken other)
+        public bool Equals(IToken? other)
         {
             return Equals(other as LiteralToken);
         }
 
-        public bool Equals(LiteralToken other)
+        public bool Equals(LiteralToken? other)
         {
             if (ReferenceEquals(other, null))
             {
                 return false;
             }
-            return other._data.SequenceEqual(_data);
+
+            return other._data == _data;
         }
 
         public override int GetHashCode()
         {
-            return _data.GetHashCode();
+            return _data;
         }
         #endregion
     }

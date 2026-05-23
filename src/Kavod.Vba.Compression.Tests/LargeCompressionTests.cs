@@ -29,7 +29,7 @@ namespace Kavod.Vba.Compression.Tests
             await Assert.That(data.SequenceEqual(convertedData)).IsTrue();
         }
 
-        private IEnumerable<byte> GetLargeByteSequenceWithLowCompressibility()
+        private static IEnumerable<byte> GetLargeByteSequenceWithLowCompressibility()
         {
             for (byte secondByte = 0; secondByte < byte.MaxValue; secondByte++)
             {

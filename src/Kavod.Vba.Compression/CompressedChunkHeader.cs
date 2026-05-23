@@ -13,10 +13,18 @@ namespace Kavod.Vba.Compression
     /// <remarks></remarks>
     internal class CompressedChunkHeader
     {
+        private const ushort CompressedChunkFlag = 0x8000;
+        private const ushort ChunkSignature = 0x3000;
+        private const ushort ChunkSignatureMask = 0x7000;
+        private const ushort ChunkSizeMask = 0x0fff;
+
         internal CompressedChunkHeader(IChunkData chunkData)
         {
+            ArgumentNullException.ThrowIfNull(chunkData);
+
             IsCompressed = chunkData is CompressedChunkData;
-            CompressedChunkSize = (ushort) (chunkData.Size + 2);
+            CompressedChunkSize = (ushort)(chunkData.Size + 2);
+            ValidateChunkSizeAndCompressedFlag();
         }
 
         internal CompressedChunkHeader(UInt16 header)
@@ -26,40 +34,25 @@ namespace Kavod.Vba.Compression
 
         internal CompressedChunkHeader(BinaryReader dataReader)
         {
-            var header = dataReader.ReadUInt16();
+            ArgumentNullException.ThrowIfNull(dataReader);
+
+            var header = BinaryUtilities.ReadUInt16LittleEndian(dataReader, "compressed chunk header");
             DecodeHeader(header);
         }
 
         private void DecodeHeader(UInt16 header)
         {
-            var temp = (UInt16)(header & 0xf000);
-            switch (temp)
+            if ((header & ChunkSignatureMask) != ChunkSignature)
             {
-                case 0xb000:
-                    IsCompressed = true;
-                    break;
-
-                case 0x3000:
-                    IsCompressed = false;
-                    break;
-
-                //default:
-                    //throw new Exception();
+                throw new InvalidDataException($"Invalid compressed chunk header signature: 0x{header:X4}.");
             }
 
-////# chunk size = 12 first bits of header + 3
-//            var chunk_size = (header & 0x0FFF) + 3;
-//            //# chunk signature = 3 next bits - should always be 0b011
-//            var chunk_signature = (header >> 12) & 0x07;
-//            if (chunk_signature != 0b011)
-//                (0).ToString();
-////# chunk flag = next bit - 1 == compressed, 0 == uncompressed
-//            var chunk_flag = (header >> 15) & 0x01;
+            IsCompressed = (header & CompressedChunkFlag) != 0;
 
             // 2.4.1.3.12 Extract CompressedChunkSize
             // SET temp TO Header BITWISE AND 0x0FFF
             // SET Size TO temp PLUS 3
-            CompressedChunkSize = (UInt16)((header & 0xfff) + 3);
+            CompressedChunkSize = (UInt16)((header & ChunkSizeMask) + 3);
 
             ValidateChunkSizeAndCompressedFlag();
         }
@@ -74,29 +67,43 @@ namespace Kavod.Vba.Compression
         {
             ValidateChunkSizeAndCompressedFlag();
 
-            UInt16 header;
+            return BinaryUtilities.GetUInt16LittleEndianBytes(GetHeaderValue());
+        }
+
+        internal void WriteTo(Stream stream)
+        {
+            ArgumentNullException.ThrowIfNull(stream);
+
+            ValidateChunkSizeAndCompressedFlag();
+            BinaryUtilities.WriteUInt16LittleEndian(stream, GetHeaderValue());
+        }
+
+        private UInt16 GetHeaderValue()
+        {
             if (IsCompressed)
             {
-                header = (UInt16)(0xb000 | (CompressedChunkSize - 3));
+                return (UInt16)(CompressedChunkFlag | ChunkSignature | (CompressedChunkSize - 3));
             }
-            else
-            {
-                header = (UInt16)(0x3000 | (CompressedChunkSize - 3));
-            }
-            return BitConverter.GetBytes(header);
+
+            return (UInt16)(ChunkSignature | (CompressedChunkSize - 3));
         }
 
         private void ValidateChunkSizeAndCompressedFlag()
         {
-            if (IsCompressed 
+            if (CompressedChunkSize < 3)
+            {
+                throw new InvalidDataException($"Compressed chunk size {CompressedChunkSize} is below the minimum size 3.");
+            }
+
+            if (IsCompressed
                 && CompressedChunkSize > 4098)
             {
-                throw new Exception();
+                throw new InvalidDataException($"Compressed chunk size {CompressedChunkSize} exceeds the maximum size 4098.");
             }
-            if (!IsCompressed 
+            if (!IsCompressed
                 && CompressedChunkSize != 4098)
             {
-                throw new Exception();
+                throw new InvalidDataException($"Raw chunk size must be 4098 bytes, but was {CompressedChunkSize}.");
             }
         }
     }
