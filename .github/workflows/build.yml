@@ -38,17 +38,16 @@ jobs:
       uses: actions/setup-dotnet@v5
       with:
         dotnet-version: |
-          8
           10
 
     - name: restore
       run: dotnet restore
 
     - name: build
-      run: dotnet build --no-restore
+      run: dotnet build --no-restore -c ${{ matrix.configuration }}
 
     - name: test
-      run: dotnet test --no-build --no-restore
+      run: dotnet test --no-build --no-restore -c ${{ matrix.configuration }}
       env:
         TestNetCoreOnly: ${{ contains(matrix.os, 'ubuntu') }}
 
