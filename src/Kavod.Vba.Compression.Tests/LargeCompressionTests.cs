@@ -1,33 +1,32 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Xunit;
 
 namespace Kavod.Vba.Compression.Tests
 {
     public class LargeCompressionTests
     {
-        [Fact]
-        public void GivenLargeByteSequenceWithLowCompressibilityCompressionProducesContainerWithMultipleRawChunks()
+        [Test]
+        public async Task GivenLargeByteSequenceWithLowCompressibilityCompressionProducesContainerWithMultipleRawChunks()
         {
             var data = GetLargeByteSequenceWithLowCompressibility().ToArray();
 
             var container = new CompressedContainer(new DecompressedBuffer(data));
 
-            Assert.True(container.CompressedChunks.Count() > 1);
-            Assert.True(container.CompressedChunks.Count(c => c.Header.IsCompressed) <= 1);  // last chunk may be compressed
+            await Assert.That(container.CompressedChunks.Count()).IsGreaterThan(1);
+            await Assert.That(container.CompressedChunks.Count(c => c.Header.IsCompressed)).IsLessThanOrEqualTo(1);  // last chunk may be compressed
         }
 
-        [Fact]
-        public void GivenLargeByteSequenceWithLowCompressibilityCompressingAndDecompressionProducesSameInput()
+        [Test]
+        public async Task GivenLargeByteSequenceWithLowCompressibilityCompressingAndDecompressionProducesSameInput()
         {
             var data = GetLargeByteSequenceWithLowCompressibility().ToArray();
 
             var compressedData = VbaCompression.Compress(data);
             var convertedData = VbaCompression.Decompress(compressedData);
 
-            Assert.True(data != convertedData);
-            Assert.True(data.LongLength == convertedData.LongLength);
-            Assert.True(data.SequenceEqual(convertedData));
+            await Assert.That(ReferenceEquals(data, convertedData)).IsFalse();
+            await Assert.That(convertedData.LongLength).IsEqualTo(data.LongLength);
+            await Assert.That(data.SequenceEqual(convertedData)).IsTrue();
         }
 
         private IEnumerable<byte> GetLargeByteSequenceWithLowCompressibility()

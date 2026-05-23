@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Linq;
-using Xunit;
 
 namespace Kavod.Vba.Compression.Tests
 {
@@ -15,67 +14,69 @@ namespace Kavod.Vba.Compression.Tests
             _validDecompressedDirStream = File.ReadAllBytes(@"Test Files/ValidDecompressedDirStream");
         }
 
-        [Fact]
-        public void CanCreateCompressedContainer()
+        [Test]
+        public async Task CanCreateCompressedContainer()
         {
             var container = new CompressedContainer(_validCompressedDirStream);
 
-            Assert.IsType<CompressedContainer>(container);
+            await Assert.That(container).IsTypeOf<CompressedContainer>();
         }
 
 
-        [Fact]
-        public void DecompressedDataSameAsMicrosoftImplementation()
+        [Test]
+        public async Task DecompressedDataSameAsMicrosoftImplementation()
         {
             var container = new CompressedContainer(_validCompressedDirStream);
             var buffer = new DecompressedBuffer(container);
 
-            Assert.True(buffer.Data.SequenceEqual(_validDecompressedDirStream));
+            await Assert.That(buffer.Data.SequenceEqual(_validDecompressedDirStream)).IsTrue();
         }
 
 
-        [Fact]
-        public void ParsedCompressedDataIsSameAsInput()
+        [Test]
+        public async Task ParsedCompressedDataIsSameAsInput()
         {
             var container = new CompressedContainer(_validCompressedDirStream);
 
-            Assert.True(container.SerializeData().SequenceEqual(_validCompressedDirStream));
+            await Assert.That(container.SerializeData().SequenceEqual(_validCompressedDirStream)).IsTrue();
         }
 
-        [Fact(Skip = "Does not pass.")]
-        public void CompressedDataSameAsMicrosoftImplementation()
+        [Test]
+        [Skip("Does not pass.")]
+        public async Task CompressedDataSameAsMicrosoftImplementation()
         {
             var buffer = new DecompressedBuffer(_validDecompressedDirStream);
             var container = new CompressedContainer(buffer);
 
-            Assert.True(container.SerializeData().SequenceEqual(_validCompressedDirStream));
+            await Assert.That(container.SerializeData().SequenceEqual(_validCompressedDirStream)).IsTrue();
         }
 
-        [Fact]
-        public void CompressDecompressDataAreEqual()
+        [Test]
+        public async Task CompressDecompressDataAreEqual()
         {
             var buffer = new DecompressedBuffer(_validDecompressedDirStream);
             var container = new CompressedContainer(buffer);
             var newBuffer = new DecompressedBuffer(container);
 
-            Assert.True(newBuffer.Data.SequenceEqual(_validDecompressedDirStream));
+            await Assert.That(newBuffer.Data.SequenceEqual(_validDecompressedDirStream)).IsTrue();
         }
 
-        [Fact]
-        public void GivenCompressedDataThatSerializingItReproducesSameData()
+        [Test]
+        public async Task GivenCompressedDataThatSerializingItReproducesSameData()
         {
             var refCompressed = new CompressedContainer(_validCompressedDirStream);
 
             var actual = refCompressed.SerializeData();
 
-            Assert.Equal(_validCompressedDirStream.Length, actual.Length);
-            Assert.Equal(_validCompressedDirStream, actual);
+            await Assert.That(actual.Length).IsEqualTo(_validCompressedDirStream.Length);
+            await Assert.That(actual.SequenceEqual(_validCompressedDirStream)).IsTrue();
         }
 
-        [Fact(Skip = "Does not pass.")]
-        public void TestDirStreamCompression()
+        [Test]
+        [Skip("Does not pass.")]
+        public async Task TestDirStreamCompression()
         {
-            CompressionTestHelper.LowLevelCompressionComparison(_validDecompressedDirStream, _validCompressedDirStream);
+            await CompressionTestHelper.LowLevelCompressionComparison(_validDecompressedDirStream, _validCompressedDirStream);
         }
     }
 }
