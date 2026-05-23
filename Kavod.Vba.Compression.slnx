@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Kavod.Vba.Compression.Benchmarks/Kavod.Vba.Compression.Benchmarks.csproj" />
+  </Folder>
   <Project Path="src/Kavod.Vba.Compression.Tests/Kavod.Vba.Compression.Tests.csproj" />
   <Project Path="src/Kavod.Vba.Compression/Kavod.Vba.Compression.csproj" />
 </Solution>
