@@ -14,11 +14,12 @@ Copyright (c) 2016 Ross Knudsen
 
 ## Benchmarks
 
-The repository includes a BenchmarkDotNet project for measuring compression and decompression memory usage across different input shapes:
+The repository includes a BenchmarkDotNet project for measuring compression and decompression memory usage across different input shapes. The VBA source inputs are based on the MIT-licensed [`aaronkeene/ExcelVBA`](https://github.com/aaronkeene/ExcelVBA) sample modules embedded in the benchmark project.
 
-- `RepeatedBytes`: highly compressible repeated data.
-- `VbaLikeSource`: repeated VBA module-like text.
-- `MixedPattern`: partially compressible text mixed with deterministic byte noise.
+- `ExcelVbaCorpus`: the embedded ExcelVBA source corpus as-is.
+- `ExcelVbaCorpusRepeated`: the ExcelVBA corpus repeated to the benchmark size.
+- `ExcelVbaLargestModuleRepeated`: the largest embedded ExcelVBA module repeated to the benchmark size.
+- `ExcelVbaCorpusWithNoise`: ExcelVBA source bytes mixed with deterministic byte noise.
 - `LowCompressibility`: deterministic pseudo-random bytes.
 
 Run the memory benchmarks from the repository root:

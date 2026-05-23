@@ -1,16 +1,20 @@
-﻿using System.Text;
+﻿using System.Reflection;
+using System.Text;
 
 namespace Kavod.Vba.Compression.Benchmarks;
 
 internal static class BenchmarkInputs
 {
     private const int InputSize = 256 * 1024;
+    private static readonly Lazy<byte[]> ExcelVbaCorpus = new(CreateExcelVbaCorpus);
+    private static readonly Lazy<byte[]> ExcelVbaLargestModule = new(CreateExcelVbaLargestModule);
 
     public static IReadOnlyList<string> InputNames { get; } =
     [
-        "RepeatedBytes",
-        "VbaLikeSource",
-        "MixedPattern",
+        "ExcelVbaCorpus",
+        "ExcelVbaCorpusRepeated",
+        "ExcelVbaLargestModuleRepeated",
+        "ExcelVbaCorpusWithNoise",
         "LowCompressibility"
     ];
 
@@ -18,53 +22,50 @@ internal static class BenchmarkInputs
     {
         return inputName switch
         {
-            "RepeatedBytes" => CreateRepeatedBytes(InputSize),
-            "VbaLikeSource" => CreateVbaLikeSource(InputSize),
-            "MixedPattern" => CreateMixedPattern(InputSize),
+            "ExcelVbaCorpus" => ExcelVbaCorpus.Value.ToArray(),
+            "ExcelVbaCorpusRepeated" => RepeatBytes(ExcelVbaCorpus.Value, InputSize),
+            "ExcelVbaLargestModuleRepeated" => RepeatBytes(ExcelVbaLargestModule.Value, InputSize),
+            "ExcelVbaCorpusWithNoise" => CreateExcelVbaCorpusWithNoise(InputSize),
             "LowCompressibility" => CreateLowCompressibility(InputSize),
             _ => throw new ArgumentOutOfRangeException(nameof(inputName), inputName, "Unknown benchmark input.")
         };
     }
 
-    private static byte[] CreateRepeatedBytes(int size)
+    private static byte[] CreateExcelVbaCorpus()
     {
-        return Enumerable.Repeat((byte)'A', size).ToArray();
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceNames = GetExcelVbaSourceResourceNames(assembly);
+        var builder = new StringBuilder();
+
+        foreach (var resourceName in resourceNames)
+        {
+            builder.AppendLine("' ---- " + GetSourceFileName(resourceName) + " ----");
+            builder.AppendLine(ReadResourceText(assembly, resourceName));
+        }
+
+        return Encoding.UTF8.GetBytes(builder.ToString());
     }
 
-    private static byte[] CreateVbaLikeSource(int size)
+    private static byte[] CreateExcelVbaLargestModule()
     {
-        const string moduleText = """
-Option Explicit
-
-Private Sub Worksheet_Change(ByVal Target As Range)
-    If Target.CountLarge > 1 Then Exit Sub
-    If Target.Column = 1 Then
-        Application.EnableEvents = False
-        Target.Offset(0, 1).Value = Now
-        Application.EnableEvents = True
-    End If
-End Sub
-
-Public Function NormalizeName(ByVal value As String) As String
-    NormalizeName = Trim$(Replace(value, vbTab, " "))
-End Function
-
-""";
-
-        return RepeatUtf8(moduleText, size);
+        var assembly = Assembly.GetExecutingAssembly();
+        return GetExcelVbaSourceResourceNames(assembly)
+            .Select(resourceName => Encoding.UTF8.GetBytes(ReadResourceText(assembly, resourceName)))
+            .OrderByDescending(bytes => bytes.Length)
+            .First();
     }
 
-    private static byte[] CreateMixedPattern(int size)
+    private static byte[] CreateExcelVbaCorpusWithNoise(int size)
     {
         var buffer = new byte[size];
-        var words = Encoding.ASCII.GetBytes("Function,Sub,Dim,Range,Cells,Value,Module,Class,End,If,Then,Else");
+        var source = ExcelVbaCorpus.Value;
         var random = CreateLowCompressibility(size / 4);
 
         for (var i = 0; i < buffer.Length; i++)
         {
             buffer[i] = i % 4 == 0
                 ? random[i / 4]
-                : words[i % words.Length];
+                : source[i % source.Length];
         }
 
         return buffer;
@@ -86,9 +87,8 @@ End Function
         return buffer;
     }
 
-    private static byte[] RepeatUtf8(string text, int size)
+    private static byte[] RepeatBytes(byte[] source, int size)
     {
-        var source = Encoding.UTF8.GetBytes(text);
         var buffer = new byte[size];
 
         for (var offset = 0; offset < buffer.Length; offset += source.Length)
@@ -98,5 +98,39 @@ End Function
         }
 
         return buffer;
+    }
+
+    private static string[] GetExcelVbaSourceResourceNames(Assembly assembly)
+    {
+        var resourceNames = assembly.GetManifestResourceNames()
+            .Where(resourceName => resourceName.Contains(".InputFiles.ExcelVBA."))
+            .Where(resourceName => resourceName.EndsWith(".vb", StringComparison.Ordinal)
+                                   || resourceName.EndsWith(".vba", StringComparison.Ordinal))
+            .Order(StringComparer.Ordinal)
+            .ToArray();
+
+        if (resourceNames.Length == 0)
+        {
+            throw new InvalidOperationException("The ExcelVBA embedded benchmark inputs were not found.");
+        }
+
+        return resourceNames;
+    }
+
+    private static string ReadResourceText(Assembly assembly, string resourceName)
+    {
+        using var stream = assembly.GetManifestResourceStream(resourceName)
+                           ?? throw new InvalidOperationException($"Embedded resource '{resourceName}' was not found.");
+        using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+        return reader.ReadToEnd();
+    }
+
+    private static string GetSourceFileName(string resourceName)
+    {
+        const string marker = ".InputFiles.ExcelVBA.";
+        var markerIndex = resourceName.IndexOf(marker, StringComparison.Ordinal);
+        return markerIndex < 0
+            ? resourceName
+            : resourceName[(markerIndex + marker.Length)..];
     }
 }
