@@ -6,3 +6,13 @@ updates:
       interval: 'weekly'
     cooldown:
       default-days: 14
+    allow:
+      - dependency-name: 'actions/*'
+        update-types:
+          - 'version-update:semver-major'
+      - dependency-name: 'azure/*'
+        update-types:
+          - 'version-update:semver-major'
+      - dependency-name: 'microsoft/*'
+        update-types:
+          - 'version-update:semver-major'
