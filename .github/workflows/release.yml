@@ -1,11 +1,19 @@
 name: release
 
 on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Create a draft prerelease without publishing NuGet packages
+        required: false
+        default: false
+        type: boolean
   push:
     tags: [ 'v*.*.*' ]
 
 permissions:
   id-token: write
+  attestations: write
   contents: write
 
 env:
@@ -33,8 +41,7 @@ jobs:
     - name: setup dotnet
       uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: |
-          10
+        dotnet-version: 10
 
     - name: restore
       run: dotnet restore
@@ -48,13 +55,118 @@ jobs:
     - name: pack
       run: dotnet pack --no-build --no-restore -c Release -o dist
 
-    - name: publish artifact
+    - name: publish unsigned packages
+      uses: actions/upload-artifact@v7
+      with:
+        name: VbaCompression_unsigned_packages
+        path: '${{ github.workspace }}/dist'
+
+  sign:
+    needs: release
+    runs-on: windows-2025
+
+    environment:
+      name: production
+      url: https://www.nuget.org/packages/NetOfficeFw.VbaCompression
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v6
+
+    - name: download unsigned packages
+      uses: actions/download-artifact@v8
+      with:
+        name: VbaCompression_unsigned_packages
+        path: ${{ github.workspace }}\dist
+
+    - name: setup dotnet
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 10
+
+    - name: setup dotnet sign tool
+      run: dotnet tool install --verbosity minimal --global sign --version 0.9.1-beta.26330.1
+
+    - name: setup Knapcode.CertificateExtractor tool
+      run: dotnet tool install --verbosity minimal --global Knapcode.CertificateExtractor --version 0.1.1
+
+    - name: azure login
+      uses: azure/login@v3
+      with:
+        client-id: ${{ secrets.ARTIFACTS_SIGNING_CLIENT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+
+    - name: sign NuGet packages
+      working-directory: '${{ github.workspace }}\dist'
+      run: |
+        sign code artifact-signing *.nupkg `
+        --publisher-name "NetOfficeFw" `
+        --description "VbaCompression library" `
+        --description-url "https://github.com/NetOfficeFw/VbaCompression" `
+        --artifact-signing-endpoint "${{ secrets.ARTIFACTS_SIGNING_ENDPOINT }}" `
+        --artifact-signing-account "${{ secrets.ARTIFACTS_SIGNING_ACCOUNT_NAME }}" `
+        --artifact-signing-certificate-profile "${{ secrets.ARTIFACTS_SIGNING_CERTIFICATE_PROFILE }}" `
+        --file-digest SHA256 `
+        --timestamp-url http://timestamp.acs.microsoft.com `
+        --timestamp-digest SHA256
+
+    - name: attestation
+      uses: actions/attest-build-provenance@v4
+      with:
+        subject-path: 'dist/*.nupkg'
+        show-summary: true
+
+    - name: extract code signing certificate
+      run: |
+        $nupkg = Get-ChildItem -Path '${{ github.workspace }}\dist' -Filter '*.nupkg' | Select-Object -First 1
+        nuget-cert-extractor --file $nupkg --output '${{ github.workspace }}\dist' --code-signing --author --leaf
+
+    - name: publish signed packages
       uses: actions/upload-artifact@v7
       with:
         name: VbaCompression_packages
-        path: |
-          ${{ github.workspace }}/dist
-          ${{ github.workspace }}/src/Kavod.Vba.Compression/README.md
+        path: '${{ github.workspace }}\dist'
+
+    - name: publish code signing certificate
+      id: certificate_artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: certificate
+        path: '${{ github.workspace }}\dist\*.cer'
+
+    - name: signing certificate instructions
+      run: |
+        $certificateUrl = '${{ steps.certificate_artifact.outputs.artifact-url }}'
+        'Before approving the publish job, upload the code-signing certificate to NuGet Gallery via Account Settings: <https://www.nuget.org/account>.' >> $env:GITHUB_STEP_SUMMARY
+        "Download the [code-signing certificate]($certificateUrl)." >> $env:GITHUB_STEP_SUMMARY
+
+    - name: release
+      uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
+      if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/') }}
+      with:
+        name: 'VbaCompression ${{ github.ref_name }}'
+        body_path: ${{ github.workspace }}/src/Kavod.Vba.Compression/README.md
+        draft: ${{ github.event.inputs.dry_run == 'true' }}
+        prerelease: ${{ github.event.inputs.dry_run == 'true' }}
+
+  publish:
+    needs: sign
+    runs-on: ubuntu-24.04
+
+    environment:
+      name: nuget-gallery
+      url: https://www.nuget.org/packages/NetOfficeFw.VbaCompression
+
+    permissions:
+      id-token: write
+
+    steps:
+    - name: download packages
+      uses: actions/download-artifact@v8
+      with:
+        name: VbaCompression_packages
+        path: ${{ github.workspace }}/dist
 
     - name: authenticate nuget.org
       uses: NuGet/login@v1
@@ -63,15 +175,9 @@ jobs:
         user: ${{ secrets.NUGET_PUSH_USER }}
 
     - name: publish
-      working-directory: '${{ github.workspace}}/dist'
+      if: ${{ github.event.inputs.dry_run != 'true' }}
+      working-directory: '${{ github.workspace }}/dist'
       run: |
-          dotnet nuget push "*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json
+        dotnet nuget push "*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
       env:
         NUGET_API_KEY: ${{ steps.nuget.outputs.NUGET_API_KEY }}
-
-    - name: release
-      uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
-      if: always() && startsWith(github.ref, 'refs/tags/')
-      with:
-        name: 'VbaCompression ${{ github.ref_name }}'
-        body_path: ${{ github.workspace }}/src/Kavod.Vba.Compression/README.md
